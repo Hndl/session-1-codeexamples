@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<title>Code Example Session No.2 - Nearest Petrol Station to Car Problem.</title>
+	
+	<script src="./grid.js"></script>
+	<script src="./Map.js"></script>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
+	<script type="text/javascript">
+
+		const BLACK = 0
+		const WHITE = 255;
+		const OPAQUE= 0
+		const ROWS	= 10
+		const COLS 	= 10
+		const BORDER = 100;
+		const THIN_LINE = 1;
+		const STATUS_PLACE_CAR = 0
+		const STATUS_PLACE_PETROLSTATION1 = 10
+		const STATUS_PLACE_PETROLSTATION2 = 20
+		const NEXT_STATUS = 10;
+		const RESET_STATUS = 0
+
+		var pinStatus = STATUS_PLACE_CAR;		
+		var myMap = new Map(ROWS,COLS);
+		var canvas = null;
+		var highlightCell = null
+		var itemCount = 0;
+
+		var car = null;
+		var petrolStations = [null,null]
+		
+		
+		function setup() {
+ 			canvas = createCanvas(window.innerWidth, window.innerHeight)
+			
+		}
+
+
+		function draw() {
+
+			background(51)
+
+			myMap.draw( canvas, BORDER, BLACK, THIN_LINE)
+
+			highlightCell = myMap.highlightCell ( mouseX, mouseY)
+		
+		}
+
+
+ 		function mouseClicked() {
+  			
+  			if (highlightCell != null){
+
+				pinStatus = placeItem(highlightCell,pinStatus)
+				
+			}
+
+		}
+
+		function clearPins () {
+
+			car = null
+			
+			petrolStation = [null,null]
+			
+			myMap.removePins()
+		
+		}
+
+		function nearestPetrolStation (){
+
+			let distanceA = -1
+			let distanceB = -1
+			
+			if ( car != null){
+
+				if (petrolStation[1] != null){
+					
+					petrolStation[1].flash(false)
+					petrolStation[0].flash(false)
+					
+					distanceA = car.distanceFrom( petrolStation[0])
+					distanceB = car.distanceFrom( petrolStation[1])
+
+					if ( distanceA <= distanceB )
+						petrolStation[0].flash(true)
+					else
+						petrolStation[1].flash(true)
+					
+				} else {
+
+					if ( petrolStation[0] != null ){
+
+						//distanceA = car.distanceFrom( petrolStation[0]) OPTOMISE!  there is only one petrol station on the map, so it must be the closest
+						petrolStation[0].flash(true)
+					
+					}
+				}
+
+			}
+
+			//console.log('Distance: Car->Station A = ' + distanceA )
+			//console.log('Distance: Car->Station B = ' + distanceB )
+		}
+
+
+		function placeItem( _highLightedCell , _pinStatus) {
+
+			if ( _highLightedCell != null
+				&& !_highLightedCell.hasPin() ) {
+
+				switch (_pinStatus) {
+
+					case STATUS_PLACE_CAR:
+
+						clearPins()
+						car = _highLightedCell.dropPin ('CAR','C' )
+						_pinStatus+=NEXT_STATUS;
+						break;
+					
+					case STATUS_PLACE_PETROLSTATION1:
+
+						_pinStatus+=NEXT_STATUS;
+						petrolStation[0] = _highLightedCell.dropPin ('PETROL_STATION', 'P1' )
+						nearestPetrolStation()
+						break;
+					
+					case STATUS_PLACE_PETROLSTATION2:
+
+						petrolStation[1] = _highLightedCell.dropPin ('PETROL_STATION' ,'P2')
+						nearestPetrolStation()
+						
+					default:
+						_pinStatus = RESET_STATUS
+
+					}
+				}
+
+				return  (_pinStatus)
+		}
+
+	
+	</script>
+<body>
+
+</body>
+</html>
